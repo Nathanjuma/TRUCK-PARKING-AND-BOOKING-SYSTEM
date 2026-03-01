@@ -150,36 +150,30 @@ function updateStation($conn, $stationId) {
 
 function deleteStation($conn, $stationId) {
     try {
-        // Check if station exists
-        $stmt = $conn->prepare("SELECT * FROM stations WHERE id = ?");
+        // Start transaction
+        $conn->beginTransaction();
+        
+        // First, delete all reviews for this station
+        $stmt = $conn->prepare("DELETE FROM reviews WHERE station_id = ?");
         $stmt->execute([$stationId]);
-        $station = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        if (!$station) {
-            respond(null, 'Station not found', 404);
-            return;
-        }
-        
-        // Check for active bookings
-        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM bookings WHERE station_id = ? AND status = 'booked'");
+        // Then, delete all bookings for this station
+        $stmt = $conn->prepare("DELETE FROM bookings WHERE station_id = ?");
         $stmt->execute([$stationId]);
-        $activeBookings = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        if ($activeBookings['count'] > 0) {
-            respond(null, 'Cannot delete station with active bookings', 400);
-            return;
-        }
-        
-        // Delete station
+        // Finally, delete the station
         $stmt = $conn->prepare("DELETE FROM stations WHERE id = ?");
         $result = $stmt->execute([$stationId]);
         
         if ($result) {
-            respond(['success' => true, 'id' => $stationId], 'Station deleted successfully');
+            $conn->commit();
+            respond(['success' => true, 'id' => $stationId], 'Station and related data deleted successfully');
         } else {
+            $conn->rollBack();
             respond(null, 'Delete failed', 500);
         }
     } catch (Exception $e) {
+        $conn->rollBack();
         respond(null, 'Delete failed: ' . $e->getMessage(), 500);
     }
 }
