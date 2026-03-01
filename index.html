@@ -1,0 +1,2704 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+
+<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#001F3F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TruckPark Pro">
+  <meta name="application-name" content="TruckPark Pro">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- Icons za PWA -->
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  <link rel="icon" type="image/png" href="/icons/icon-192x192.png">
+  <link rel="manifest" href="/manifest.json">
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TruckPark Pro</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'dark-blue': '#001F3F',
+            'gold': '#FFD700',
+            'light-gray': '#F4F4F4'
+          },
+          fontFamily: {
+            'poppins': ['Poppins', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Poppins', sans-serif; }
+    html, body { height: 100%; margin: 0; }
+    .app-wrapper { height: 100%; overflow-y: auto; }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #F4F4F4; }
+    ::-webkit-scrollbar-thumb { background: #001F3F; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #003366; }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    .animate-slide-in { animation: slideIn 0.4s ease-out forwards; }
+    .animate-pulse-hover:hover { animation: pulse 0.3s ease-in-out; }
+    
+    /* Stagger animations */
+    .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+    .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+    .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+    .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+    
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 12px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast.success { background: linear-gradient(135deg, #10B981, #059669); }
+    .toast.error { background: linear-gradient(135deg, #EF4444, #DC2626); }
+    
+    /* Button hover effects */
+    .btn-primary {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+    }
+    
+    .btn-secondary {
+      background: #001F3F;
+      transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+      background: #003366;
+      transform: translateY(-2px);
+    }
+    
+    /* Card hover effects */
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 31, 63, 0.15);
+    }
+    
+    /* Star rating */
+    .star { cursor: pointer; transition: all 0.2s ease; }
+    .star:hover { transform: scale(1.2); }
+    .star.active { color: #FFD700; }
+    .star.inactive { color: #D1D5DB; }
+    
+    /* Modal backdrop */
+    .modal-backdrop {
+      background: rgba(0, 31, 63, 0.8);
+      backdrop-filter: blur(4px);
+    }
+    
+    /* Input focus states */
+    .input-styled {
+      transition: all 0.3s ease;
+      border: 2px solid #E5E7EB;
+    }
+    .input-styled:focus {
+      border-color: #FFD700;
+      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+      outline: none;
+    }
+    
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* Hero pattern */
+    .hero-pattern {
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 30%);
+    }
+    
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #F4F4F4 25%, #E5E7EB 50%, #F4F4F4 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    /* Mobile optimizations */
+@media (max-width: 640px) {
+  .text-4xl { font-size: 2rem; }
+  .text-3xl { font-size: 1.75rem; }
+  .p-8 { padding: 1.5rem; }
+  
+  /* Better touch targets */
+  button, a, .cursor-pointer {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Swipe gestures */
+  .swipeable {
+    touch-action: pan-y pinch-zoom;
+  }
+  
+  /* Bottom sheet for mobile */
+  .bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 100;
+  }
+  
+  .bottom-sheet.show {
+    transform: translateY(0);
+  }
+  
+  /* Pull to refresh */
+  .ptr-element {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    color: #FFD700;
+    text-align: center;
+    height: 50px;
+    transform: translateY(-50px) translateZ(0);
+    transition: transform 0.3s;
+  }
+  
+  .ptr-element.refresh {
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light dark;
+  }
+}
+
+/* Loading skeleton for mobile */
+.skeleton-mobile {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full bg-light-gray">
+  <div class="app-wrapper" id="app"><!-- Toast Notification -->
+   <div id="toast" class="toast"></div><!-- Navigation -->
+   <nav id="navbar" class="bg-dark-blue shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="flex justify-between items-center h-16">
+      <div class="flex items-center cursor-pointer" onclick="navigate('home')">
+       <div class="text-gold text-2xl mr-2">
+        🚛
+       </div><span id="nav-title" class="text-white font-bold text-xl">TruckPark Pro</span>
+      </div><!-- Desktop Nav -->
+      <div class="hidden md:flex items-center space-x-6" id="nav-links"><a onclick="navigate('home')" class="text-white hover:text-gold transition cursor-pointer">Home</a> <a onclick="navigate('stations')" class="text-white hover:text-gold transition cursor-pointer">Stations</a>
+       <div id="auth-nav-desktop"></div>
+      </div><!-- Mobile menu button --> <button onclick="toggleMobileMenu()" class="md:hidden text-white">
+       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+       </svg></button>
+     </div>
+    </div><!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-dark-blue border-t border-gray-700">
+     <div class="px-4 py-3 space-y-2"><a onclick="navigate('home'); toggleMobileMenu()" class="block text-white hover:text-gold py-2 cursor-pointer">Home</a> <a onclick="navigate('stations'); toggleMobileMenu()" class="block text-white hover:text-gold py-2 cursor-pointer">Stations</a>
+      <div id="auth-nav-mobile"></div>
+     </div>
+    </div>
+   </nav><!-- Main Content -->
+   <main id="main-content" class="min-h-screen"><!-- Content will be dynamically loaded -->
+   </main><!-- Footer -->
+   <footer class="bg-dark-blue text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+       <div class="flex items-center mb-4"><span class="text-gold text-2xl mr-2">🚛</span> <span id="footer-title" class="font-bold text-xl">TruckPark Pro</span>
+       </div>
+       <p class="text-gray-400 text-sm">Professional truck parking solutions for drivers and parking owners.</p>
+      </div>
+      <div>
+       <h4 class="font-semibold text-gold mb-4">Quick Links</h4>
+       <ul class="space-y-2 text-sm text-gray-400">
+        <li><a onclick="navigate('home')" class="hover:text-gold cursor-pointer transition">Home</a></li>
+        <li><a onclick="navigate('stations')" class="hover:text-gold cursor-pointer transition">Find Parking</a></li>
+        <li><a onclick="navigate('register')" class="hover:text-gold cursor-pointer transition">Register</a></li>
+       </ul>
+      </div>
+      <div>
+       <h4 class="font-semibold text-gold mb-4">Contact</h4>
+       <ul class="space-y-2 text-sm text-gray-400">
+        <li>📧 nathanmtindya47@gmail.com</li>
+        <li>📞 +255 742904152</li>
+       </ul>
+      </div>
+     </div>
+     <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-500 text-sm">
+      © 2026 TruckPark Pro. All rights reserved.
+     </div>
+    </div>
+   </footer><!-- Modal Container -->
+   <div id="modal-container" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+    <div id="modal-content" class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90%] overflow-y-auto"></div>
+   </div>
+  </div>
+  <script>
+    // ===== CONFIGURATION =====
+    const defaultConfig = {
+      app_title: 'TruckPark Pro',
+      tagline: 'Find & Book Secure Truck Parking',
+      cta_button_text: 'Find Parking Now',
+      background_color: '#F4F4F4',
+      surface_color: '#FFFFFF',
+      text_color: '#001F3F',
+      primary_action_color: '#FFD700',
+      secondary_action_color: '#001F3F'
+    };
+    
+    let config = { ...defaultConfig };
+    
+    // ===== APP STATE =====
+    let appState = {
+      currentUser: null,
+      currentPage: 'home',
+      users: [],
+      stations: [],
+      bookings: [],
+      reviews: [],
+      isLoading: false
+    };
+    
+    // ===== TOAST NOTIFICATION =====
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+    
+    // ===== MOBILE MENU =====
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    }
+    
+    // ===== MODAL FUNCTIONS =====
+    function openModal(content) {
+      const container = document.getElementById('modal-container');
+      const modalContent = document.getElementById('modal-content');
+      modalContent.innerHTML = content;
+      container.classList.remove('hidden');
+    }
+    
+    function closeModal() {
+      document.getElementById('modal-container').classList.add('hidden');
+    }
+    
+    // Close modal on backdrop click
+    document.getElementById('modal-container').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-container') closeModal();
+    });
+    
+    // ===== NAVIGATION =====
+    function navigate(page, data = null) {
+      appState.currentPage = page;
+      renderPage(page, data);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    // ===== DATA SDK HANDLER =====
+    const dataHandler = {
+      onDataChanged(data) {
+        // Categorize data by type
+        appState.users = data.filter(d => d.type === 'user');
+        appState.stations = data.filter(d => d.type === 'station');
+        appState.bookings = data.filter(d => d.type === 'booking');
+        appState.reviews = data.filter(d => d.type === 'review');
+        
+        // Check if current user still exists
+        if (appState.currentUser) {
+          const user = appState.users.find(u => u.__backendId === appState.currentUser.__backendId);
+          if (user) {
+            appState.currentUser = user;
+          }
+        }
+        
+        updateAuthNav();
+        renderPage(appState.currentPage);
+      }
+    };
+    
+    // ===== AUTH NAV UPDATE =====
+    function updateAuthNav() {
+  const desktopNav = document.getElementById('auth-nav-desktop');
+  const mobileNav = document.getElementById('auth-nav-mobile');
+  
+  console.log('Updating auth nav, current user:', appState.currentUser);
+  
+  // Also check localStorage in case appState is empty but user exists
+  if (!appState.currentUser) {
+    const savedUser = localStorage.getItem('truckpark_user');
+    if (savedUser) {
+      try {
+        appState.currentUser = JSON.parse(savedUser);
+        console.log('Restored user from localStorage in updateAuthNav:', appState.currentUser);
+      } catch (e) {
+        console.error('Failed to parse saved user:', e);
+      }
+    }
+  }
+  
+  if (appState.currentUser) {
+    const role = appState.currentUser.role;
+    console.log('User role is:', role);
+    
+    const dashboardLink = role === 'owner' ? 
+      `<a onclick="navigate('owner-dashboard')" class="text-white hover:text-gold transition cursor-pointer">Dashboard</a>` :
+      `<a onclick="navigate('driver-dashboard')" class="text-white hover:text-gold transition cursor-pointer">My Bookings</a>`;
+    
+    desktopNav.innerHTML = `
+      <div class="flex items-center space-x-4">
+        ${dashboardLink}
+        <span class="text-gold">👤 ${appState.currentUser.name}</span>
+        <button onclick="logout()" class="bg-gold text-dark-blue px-4 py-2 rounded-lg font-medium hover:bg-yellow-400 transition">Logout</button>
+      </div>
+    `;
+    
+    mobileNav.innerHTML = `
+      <a onclick="navigate('${role === 'owner' ? 'owner-dashboard' : 'driver-dashboard'}'); toggleMobileMenu()" class="block text-white hover:text-gold py-2 cursor-pointer">${role === 'owner' ? 'Dashboard' : 'My Bookings'}</a>
+      <div class="text-gold py-2">👤 ${appState.currentUser.name}</div>
+      <button onclick="logout(); toggleMobileMenu()" class="w-full bg-gold text-dark-blue px-4 py-2 rounded-lg font-medium mt-2">Logout</button>
+    `;
+  } else {
+    desktopNav.innerHTML = `
+      <div class="flex items-center space-x-3">
+        <button onclick="navigate('login')" class="text-white hover:text-gold transition">Login</button>
+        <button onclick="navigate('register')" class="btn-primary text-dark-blue px-4 py-2 rounded-lg font-medium">Register</button>
+      </div>
+    `;
+    
+    mobileNav.innerHTML = `
+      <a onclick="navigate('login'); toggleMobileMenu()" class="block text-white hover:text-gold py-2 cursor-pointer">Login</a>
+      <button onclick="navigate('register'); toggleMobileMenu()" class="w-full btn-primary text-dark-blue px-4 py-2 rounded-lg font-medium mt-2">Register</button>
+    `;
+  }
+}
+    
+    // ===== PAGE TEMPLATES =====
+    function getHomePage() {
+      return `
+        <!-- Hero Section -->
+        <section class="bg-dark-blue hero-pattern py-16 md:py-24">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center animate-fade-in">
+              <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
+                <span id="hero-title">${config.app_title || defaultConfig.app_title}</span>
+              </h1>
+              <p id="hero-tagline" class="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                ${config.tagline || defaultConfig.tagline}
+              </p>
+              <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="navigate('stations')" id="hero-cta" class="btn-primary text-dark-blue px-8 py-4 rounded-xl font-semibold text-lg animate-pulse-hover">
+                  ${config.cta_button_text || defaultConfig.cta_button_text}
+                </button>
+                <button onclick="navigate('register')" class="btn-secondary text-white px-8 py-4 rounded-xl font-semibold text-lg border-2 border-gold">
+                  Become a Partner
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Stats Section -->
+        <section class="py-12 bg-white">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div class="text-center p-6 animate-fade-in stagger-1">
+                <div class="text-4xl mb-2">🚛</div>
+                <div class="text-3xl font-bold text-dark-blue">${appState.stations.length}+</div>
+                <div class="text-gray-500">Parking Stations</div>
+              </div>
+              <div class="text-center p-6 animate-fade-in stagger-2">
+                <div class="text-4xl mb-2">👥</div>
+                <div class="text-3xl font-bold text-dark-blue">${appState.users.filter(u => u.role === 'driver').length}+</div>
+                <div class="text-gray-500">Drivers</div>
+              </div>
+              <div class="text-center p-6 animate-fade-in stagger-3">
+                <div class="text-4xl mb-2">📍</div>
+                <div class="text-3xl font-bold text-dark-blue">${appState.bookings.length}+</div>
+                <div class="text-gray-500">Bookings Made</div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+        
+        <!-- Features Section -->
+        <section class="py-16 bg-light-gray">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-dark-blue mb-12">
+              Why Choose <span class="gradient-text">TruckPark Pro</span>?
+            </h2>
+            <div class="grid md:grid-cols-3 gap-8">
+              <div class="bg-white p-8 rounded-2xl shadow-lg card-hover animate-fade-in stagger-1">
+                <div class="w-16 h-16 bg-gold/20 rounded-2xl flex items-center justify-center text-3xl mb-6">🔒</div>
+                <h3 class="text-xl font-bold text-dark-blue mb-3">Secure Parking</h3>
+                <p class="text-gray-600">All stations feature CCTV, security guards, and fenced areas for maximum protection.</p>
+              </div>
+              <div class="bg-white p-8 rounded-2xl shadow-lg card-hover animate-fade-in stagger-2">
+                <div class="w-16 h-16 bg-gold/20 rounded-2xl flex items-center justify-center text-3xl mb-6">📱</div>
+                <h3 class="text-xl font-bold text-dark-blue mb-3">Easy Booking</h3>
+                <p class="text-gray-600">Book your spot in seconds from your phone or computer. Instant confirmation.</p>
+              </div>
+              <div class="bg-white p-8 rounded-2xl shadow-lg card-hover animate-fade-in stagger-3">
+                <div class="w-16 h-16 bg-gold/20 rounded-2xl flex items-center justify-center text-3xl mb-6">💰</div>
+                <h3 class="text-xl font-bold text-dark-blue mb-3">Best Prices</h3>
+                <p class="text-gray-600">Competitive pricing with transparent rates. No hidden fees or surprises.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Featured Stations -->
+        <section class="py-16 bg-white">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-dark-blue mb-4">
+              Featured Stations
+            </h2>
+            <p class="text-gray-500 text-center mb-12">Top-rated parking locations trusted by drivers</p>
+            <div class="grid md:grid-cols-3 gap-6" id="featured-stations">
+              ${appState.stations.slice(0, 3).map((station, index) => getStationCard(station, index)).join('')}
+              ${appState.stations.length === 0 ? `
+                <div class="col-span-3 text-center py-12">
+                  <div class="text-6xl mb-4">🏗️</div>
+                  <p class="text-gray-500 text-lg">No stations available yet. Be the first to add one!</p>
+                  <button onclick="navigate('register')" class="btn-primary text-dark-blue px-6 py-3 rounded-xl font-medium mt-4">
+                    Register as Owner
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+            ${appState.stations.length > 3 ? `
+              <div class="text-center mt-8">
+                <button onclick="navigate('stations')" class="btn-secondary text-white px-8 py-3 rounded-xl font-medium">
+                  View All Stations →
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        </section>
+        
+        <!-- CTA Section -->
+        <section class="py-16 bg-dark-blue hero-pattern">
+          <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+              Ready to Get Started?
+            </h2>
+            <p class="text-gray-300 text-lg mb-8">
+              Join thousands of drivers and parking owners on our platform
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <button onclick="navigate('register')" class="btn-primary text-dark-blue px-8 py-4 rounded-xl font-semibold text-lg">
+                🚛 Register as Driver
+              </button>
+              <button onclick="navigate('register')" class="bg-transparent border-2 border-gold text-gold px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gold hover:text-dark-blue transition">
+                🏢 Register as Owner
+              </button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+    
+    function getStationCard(station, index = 0) {
+  // Get consistent station ID
+  const stationId = station.id || station.__backendId;
+  
+  const stationReviews = appState.reviews.filter(r => r.station_id == stationId);
+  const avgRating = stationReviews.length > 0 
+    ? (stationReviews.reduce((a,b) => a + b.rating, 0) / stationReviews.length).toFixed(1) 
+    : 'New';
+  
+  const securityFeatures = station.security_features ? station.security_features.split(',').map(f => f.trim()) : [];
+  const amenities = station.amenities ? station.amenities.split(',').map(a => a.trim()) : [];
+  
+  return `
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden card-hover animate-fade-in stagger-${(index % 4) + 1}">
+      <div class="bg-gradient-to-br from-dark-blue to-blue-900 h-40 flex items-center justify-center relative">
+        <span class="text-6xl">🅿️</span>
+        <div class="absolute top-4 right-4 bg-gold text-dark-blue px-3 py-1 rounded-full text-sm font-bold">
+          ${avgRating === 'New' ? '🆕 New' : `⭐ ${avgRating}`}
+        </div>
+      </div>
+      <div class="p-6">
+        <h3 class="text-xl font-bold text-dark-blue mb-2">${station.station_name}</h3>
+        <p class="text-gray-500 mb-4 flex items-center">
+          <span class="mr-2">📍</span> ${station.location}
+        </p>
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <span class="text-2xl font-bold text-dark-blue">TSh ${station.price_per_night}</span>
+            <span class="text-gray-400">/night</span>
+          </div>
+          <div class="text-right">
+            <div class="text-green-500 font-semibold">${station.available_slots}/${station.total_slots}</div>
+            <div class="text-xs text-gray-400">slots available</div>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 mb-4">
+          ${securityFeatures.slice(0, 3).map(f => `
+            <span class="bg-light-gray text-gray-600 px-2 py-1 rounded-lg text-xs">${f}</span>
+          `).join('')}
+        </div>
+        <button onclick="viewStationDetails('${stationId}')" class="w-full btn-primary text-dark-blue py-3 rounded-xl font-semibold">
+          View Details
+        </button>
+      </div>
+    </div>
+  `;
+}
+    
+    function getStationsPage() {
+      const locations = [...new Set(appState.stations.map(s => s.location))];
+      
+      return `
+        <section class="py-8 bg-white border-b">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-bold text-dark-blue mb-6">Find Parking Stations</h1>
+            <div class="flex flex-col md:flex-row gap-4">
+              <div class="flex-1">
+                <input 
+                  type="text" 
+                  id="search-input"
+                  placeholder="Search by name or location..." 
+                  class="w-full px-4 py-3 rounded-xl input-styled"
+                  oninput="filterStations()"
+                >
+              </div>
+              <select id="location-filter" class="px-4 py-3 rounded-xl input-styled bg-white" onchange="filterStations()">
+                <option value="">All Locations</option>
+                ${locations.map(loc => `<option value="${loc}">${loc}</option>`).join('')}
+              </select>
+              <select id="sort-filter" class="px-4 py-3 rounded-xl input-styled bg-white" onchange="filterStations()">
+                <option value="name">Sort by Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="availability">Most Available</option>
+              </select>
+            </div>
+          </div>
+        </section>
+        
+        <section class="py-8 bg-light-gray min-h-[60%]">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="stations-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              ${appState.stations.map((station, index) => getStationCard(station, index)).join('')}
+              ${appState.stations.length === 0 ? `
+                <div class="col-span-3 text-center py-16">
+                  <div class="text-8xl mb-6">🚫</div>
+                  <h3 class="text-2xl font-bold text-dark-blue mb-4">No Stations Found</h3>
+                  <p class="text-gray-500 mb-6">Be the first to add a parking station!</p>
+                  <button onclick="navigate('register')" class="btn-primary text-dark-blue px-8 py-3 rounded-xl font-medium">
+                    Register as Owner
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+    
+   function filterStations() {
+  const searchTerm = document.getElementById('search-input').value.toLowerCase();
+  const locationFilter = document.getElementById('location-filter').value;
+  const sortFilter = document.getElementById('sort-filter').value;
+  
+  let filtered = appState.stations.filter(station => {
+    const matchesSearch = station.station_name.toLowerCase().includes(searchTerm) || 
+                        station.location.toLowerCase().includes(searchTerm);
+    const matchesLocation = !locationFilter || station.location === locationFilter;
+    return matchesSearch && matchesLocation;
+  });
+  
+  // Sort
+  switch(sortFilter) {
+    case 'price-low':
+      filtered.sort((a, b) => a.price_per_night - b.price_per_night);
+      break;
+    case 'price-high':
+      filtered.sort((a, b) => b.price_per_night - a.price_per_night);
+      break;
+    case 'availability':
+      filtered.sort((a, b) => b.available_slots - a.available_slots);
+      break;
+    default:
+      filtered.sort((a, b) => a.station_name.localeCompare(b.station_name));
+  }
+  
+  const grid = document.getElementById('stations-grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="col-span-3 text-center py-16">
+        <div class="text-8xl mb-6">🔍</div>
+        <h3 class="text-2xl font-bold text-dark-blue mb-4">No Results Found</h3>
+        <p class="text-gray-500">Try adjusting your search or filters</p>
+      </div>
+    `;
+  } else {
+    grid.innerHTML = filtered.map((station, index) => getStationCard(station, index)).join('');
+  }
+}
+    
+   function viewStationDetails(stationId) {
+  console.log('Viewing station details for ID:', stationId);
+  console.log('Available stations:', appState.stations);
+  
+  // Find station using either id or __backendId
+  const station = appState.stations.find(s => 
+    s.id == stationId || s.__backendId == stationId
+  );
+  
+  console.log('Found station:', station);
+  
+  if (station) {
+    navigate('station-details', { stationId: station.id || station.__backendId });
+  } else {
+    showToast('Station not found', 'error');
+  }
+}
+    
+    function getStationDetailsPage(stationId) {
+  console.log('Getting details for station ID:', stationId);
+  console.log('All stations:', appState.stations);
+  
+  // Find station using either id or __backendId
+  const station = appState.stations.find(s => 
+    s.id == stationId || s.__backendId == stationId
+  );
+  
+  console.log('Found station:', station);
+  
+  if (!station) {
+    return `
+      <div class="max-w-4xl mx-auto px-4 py-16 text-center">
+        <div class="text-8xl mb-6">❌</div>
+        <h2 class="text-2xl font-bold text-dark-blue mb-4">Station Not Found</h2>
+        <p class="text-gray-500 mb-4">Station ID: ${stationId}</p>
+        <p class="text-gray-500 mb-4">Available stations: ${appState.stations.length}</p>
+        <button onclick="navigate('stations')" class="btn-primary text-dark-blue px-6 py-3 rounded-xl font-medium">
+          Back to Stations
+        </button>
+      </div>
+    `;
+  }
+  
+  // Get station ID consistently
+  const currentStationId = station.id || station.__backendId;
+  
+  const stationReviews = appState.reviews.filter(r => r.station_id == currentStationId);
+  const avgRating = stationReviews.length > 0 
+    ? (stationReviews.reduce((a,b) => a + b.rating, 0) / stationReviews.length).toFixed(1) 
+    : 'No reviews yet';
+  
+  const securityFeatures = station.security_features ? station.security_features.split(',').map(f => f.trim()) : [];
+  const amenities = station.amenities ? station.amenities.split(',').map(a => a.trim()) : [];
+  
+  const securityIcons = {
+    'CCTV': '📹', 'Guard': '👮', 'Fence': '🚧', 'Lighting': '💡', 'Gate': '🚪'
+  };
+  
+  const amenityIcons = {
+    'Toilet': '🚽', 'Shower': '🚿', 'Food': '🍔', 'WiFi': '📶', 'Rest Area': '🛋️', 'Shop': '🏪'
+  };
+  
+  return `
+    <section class="bg-dark-blue py-8">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button onclick="navigate('stations')" class="text-gold hover:text-yellow-400 mb-4 inline-flex items-center">
+          ← Back to Stations
+        </button>
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+          <div class="bg-gradient-to-br from-dark-blue to-blue-900 h-48 flex items-center justify-center relative">
+            <span class="text-8xl">🅿️</span>
+            <div class="absolute top-4 right-4 bg-gold text-dark-blue px-4 py-2 rounded-full font-bold">
+              ${typeof avgRating === 'string' && avgRating.includes('No') ? '🆕 New' : `⭐ ${avgRating}`}
+            </div>
+          </div>
+          
+          <div class="p-8">
+            <div class="flex flex-col md:flex-row justify-between items-start mb-6">
+              <div>
+                <h1 class="text-3xl font-bold text-dark-blue mb-2">${station.station_name}</h1>
+                <p class="text-gray-500 text-lg flex items-center">
+                  <span class="mr-2">📍</span> ${station.location}
+                </p>
+              </div>
+              <div class="text-right mt-4 md:mt-0">
+                <div class="text-4xl font-bold text-dark-blue">TSh ${station.price_per_night}</div>
+                <div class="text-gray-400">per night</div>
+              </div>
+            </div>
+            
+            <!-- Availability -->
+            <div class="bg-light-gray rounded-xl p-6 mb-6">
+              <h3 class="font-semibold text-dark-blue mb-4">Availability</h3>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
+                  <span class="text-2xl font-bold text-green-600">${station.available_slots}</span>
+                  <span class="text-gray-500 ml-2">available</span>
+                </div>
+                <div class="text-gray-500">
+                  of ${station.total_slots} total slots
+                </div>
+              </div>
+              <div class="mt-4 bg-gray-200 rounded-full h-3">
+                <div class="bg-green-500 h-3 rounded-full" style="width: ${(station.available_slots / station.total_slots) * 100}%"></div>
+              </div>
+            </div>
+            
+            <!-- Security Features -->
+            <div class="mb-6">
+              <h3 class="font-semibold text-dark-blue mb-4">🔒 Security Features</h3>
+              <div class="flex flex-wrap gap-3">
+                ${securityFeatures.map(f => {
+                  const icon = securityIcons[f] || '✓';
+                  return `<span class="bg-dark-blue text-white px-4 py-2 rounded-xl text-sm">${icon} ${f}</span>`;
+                }).join('')}
+                ${securityFeatures.length === 0 ? '<span class="text-gray-400">No security features listed</span>' : ''}
+              </div>
+            </div>
+            
+            <!-- Amenities -->
+            <div class="mb-6">
+              <h3 class="font-semibold text-dark-blue mb-4">🎯 Amenities</h3>
+              <div class="flex flex-wrap gap-3">
+                ${amenities.map(a => {
+                  const icon = amenityIcons[a] || '✓';
+                  return `<span class="bg-gold/20 text-dark-blue px-4 py-2 rounded-xl text-sm">${icon} ${a}</span>`;
+                }).join('')}
+                ${amenities.length === 0 ? '<span class="text-gray-400">No amenities listed</span>' : ''}
+              </div>
+            </div>
+            
+            <!-- Booking Button -->
+            <div class="border-t pt-6">
+              ${appState.currentUser ? `
+                ${appState.currentUser.role === 'driver' ? `
+                  ${station.available_slots > 0 ? `
+                    <button onclick="openBookingModal('${currentStationId}')" class="w-full btn-primary text-dark-blue py-4 rounded-xl font-bold text-lg">
+                      Book Now - TSh ${station.price_per_night}/night
+                    </button>
+                  ` : `
+                    <button disabled class="w-full bg-gray-300 text-gray-500 py-4 rounded-xl font-bold text-lg cursor-not-allowed">
+                      No Slots Available
+                    </button>
+                  `}
+                ` : `
+                  <p class="text-center text-gray-500">Login as a driver to book this station</p>
+                `}
+              ` : `
+                <button onclick="navigate('login')" class="w-full btn-primary text-dark-blue py-4 rounded-xl font-bold text-lg">
+                  Login to Book
+                </button>
+              `}
+            </div>
+          </div>
+        </div>
+        
+       // Reviews Section
+<div class="bg-white rounded-2xl shadow-lg mt-8 p-8 animate-fade-in">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-dark-blue">Reviews (${stationReviews.length})</h2>
+    ${appState.currentUser && appState.currentUser.role === 'driver' ? `
+      <button onclick="openReviewModal('${currentStationId}')" class="btn-secondary text-white px-4 py-2 rounded-xl font-medium">
+        Write Review
+      </button>
+    ` : ''}
+  </div>
+  
+  <div id="reviews-list" class="space-y-4">
+    ${stationReviews.length === 0 ? `
+      <div class="text-center py-8 text-gray-500">
+        <div class="text-4xl mb-4">💬</div>
+        <p>No reviews yet. Be the first to review!</p>
+      </div>
+    ` : stationReviews.map(review => {
+      const reviewer = appState.users.find(u => (u.id || u.__backendId) == review.user_id);
+      return `
+        <div class="border-b pb-4 last:border-0">
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-dark-blue rounded-full flex items-center justify-center text-white font-bold mr-3">
+                ${reviewer ? reviewer.name.charAt(0).toUpperCase() : '?'}
+              </div>
+              <div>
+                <div class="font-semibold text-dark-blue">${reviewer ? reviewer.name : 'Unknown User'}</div>
+                <div class="flex text-gold">
+                  ${Array(5).fill(0).map((_, i) => 
+                    i < review.rating ? '⭐' : '☆'
+                  ).join('')}
+                </div>
+              </div>
+            </div>
+            <div class="text-sm text-gray-400">${new Date(review.created_at).toLocaleDateString()}</div>
+          </div>
+          <p class="text-gray-600 ml-13 pl-13">${review.comment || 'No comment'}</p>
+        </div>
+      `;
+    }).join('')}
+  </div>
+</div>
+      </div>
+    </section>
+  `;
+}
+    
+    function getLoginPage() {
+      return `
+        <section class="min-h-[80%] bg-light-gray flex items-center justify-center py-12 px-4">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+            <div class="bg-dark-blue py-8 text-center">
+              <div class="text-5xl mb-4">🚛</div>
+              <h1 class="text-2xl font-bold text-white">Welcome Back</h1>
+              <p class="text-gray-400">Login to your account</p>
+            </div>
+            
+            <form id="login-form" class="p-8" onsubmit="handleLogin(event)">
+              <div class="mb-6">
+                <label class="block text-dark-blue font-medium mb-2">Email Address</label>
+                <input 
+                  type="email" 
+                  id="login-email"
+                  class="w-full px-4 py-3 rounded-xl input-styled" 
+                  placeholder="driver@example.com"
+                  required
+                >
+              </div>
+              
+              <div class="mb-6">
+                <label class="block text-dark-blue font-medium mb-2">Password</label>
+                <input 
+                  type="password" 
+                  id="login-password"
+                  class="w-full px-4 py-3 rounded-xl input-styled" 
+                  placeholder="••••••••"
+                  required
+                >
+              </div>
+              
+              <button type="submit" id="login-btn" class="w-full btn-primary text-dark-blue py-4 rounded-xl font-bold text-lg mb-4">
+                Login
+              </button>
+              
+              <p class="text-center text-gray-500">
+                Don't have an account? 
+                <a onclick="navigate('register')" class="text-gold font-semibold cursor-pointer hover:underline">Register</a>
+              </p>
+            </form>
+          </div>
+        </section>
+      `;
+    }
+    
+    function getRegisterPage() {
+      return `
+        <section class="min-h-[80%] bg-light-gray flex items-center justify-center py-12 px-4">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+            <div class="bg-dark-blue py-8 text-center">
+              <div class="text-5xl mb-4">🚛</div>
+              <h1 class="text-2xl font-bold text-white">Create Account</h1>
+              <p class="text-gray-400">Join our platform today</p>
+            </div>
+            
+            <form id="register-form" class="p-8 max-h-[70vh] overflow-y-auto" onsubmit="handleRegister(event)">
+              <!-- Full Name -->
+              <div class="mb-5">
+                <label class="block text-dark-blue font-medium mb-2">Full Name</label>
+                <input 
+                  type="text" 
+                  id="register-name"
+                  class="w-full px-4 py-3 rounded-xl input-styled" 
+                  placeholder="John Doe"
+                  minlength="3"
+                  required
+                >
+                <div class="text-xs text-gray-400 mt-1">✓ Min 3 letters, no numbers</div>
+              </div>
+              
+              <!-- Email -->
+              <div class="mb-5">
+                <label class="block text-dark-blue font-medium mb-2">Email Address</label>
+                <input 
+                  type="email" 
+                  id="register-email"
+                  class="w-full px-4 py-3 rounded-xl input-styled" 
+                  placeholder="john@example.com"
+                  required
+                >
+                <div class="text-xs text-gray-400 mt-1">✓ Must be valid email</div>
+              </div>
+              
+              <!-- Password -->
+              <div class="mb-5">
+                <label class="block text-dark-blue font-medium mb-2">Password</label>
+                <input 
+                  type="password" 
+                  id="register-password"
+                  class="w-full px-4 py-3 rounded-xl input-styled" 
+                  placeholder="••••••••"
+                  minlength="8"
+                  oninput="updatePasswordStrength()"
+                  required
+                >
+                
+                <!-- Password Strength Indicator -->
+                <div class="mt-3 space-y-2">
+                  <div class="flex gap-1">
+                    <div class="strength-bar flex-1 h-2 rounded-full bg-gray-200" id="strength-1"></div>
+                    <div class="strength-bar flex-1 h-2 rounded-full bg-gray-200" id="strength-2"></div>
+                    <div class="strength-bar flex-1 h-2 rounded-full bg-gray-200" id="strength-3"></div>
+                    <div class="strength-bar flex-1 h-2 rounded-full bg-gray-200" id="strength-4"></div>
+                    <div class="strength-bar flex-1 h-2 rounded-full bg-gray-200" id="strength-5"></div>
+                  </div>
+                  <div id="strength-text" class="text-xs text-gray-400">Requirements:</div>
+                </div>
+                
+                <!-- Requirements Checklist -->
+                <div class="mt-3 space-y-1 text-xs">
+                  <div id="req-length" class="text-gray-400">○ 8+ characters</div>
+                  <div id="req-upper" class="text-gray-400">○ Uppercase (A-Z)</div>
+                  <div id="req-lower" class="text-gray-400">○ Lowercase (a-z)</div>
+                  <div id="req-number" class="text-gray-400">○ Number (0-9)</div>
+                  <div id="req-special" class="text-gray-400">○ Special (!@#$%^&*)</div>
+                </div>
+              </div>
+              
+              <!-- Confirm Password -->
+              <div class="mb-5">
+                <label class="block text-dark-blue font-medium mb-2">Confirm Password</label>
+                <input 
+                  type="password" 
+                  id="register-confirm-password"
+                  class="w-full px-4 py-3 rounded-xl input-styled" 
+                  placeholder="••••••••"
+                  oninput="updatePasswordMatch()"
+                  required
+                >
+                <div id="password-match-status" class="text-xs text-gray-400 mt-1">○ Passwords must match</div>
+              </div>
+              
+              <!-- Role Selection -->
+              <div class="mb-6">
+                <label class="block text-dark-blue font-medium mb-3">I am a...</label>
+                <div class="grid grid-cols-2 gap-4">
+                  <label class="cursor-pointer">
+                    <input type="radio" name="role" value="driver" class="hidden peer" checked>
+                    <div class="peer-checked:bg-dark-blue peer-checked:text-white peer-checked:border-dark-blue border-2 border-gray-200 rounded-xl p-4 text-center transition">
+                      <div class="text-3xl mb-2">🚛</div>
+                      <div class="font-semibold">Driver</div>
+                    </div>
+                  </label>
+                  <label class="cursor-pointer">
+                    <input type="radio" name="role" value="owner" class="hidden peer">
+                    <div class="peer-checked:bg-dark-blue peer-checked:text-white peer-checked:border-dark-blue border-2 border-gray-200 rounded-xl p-4 text-center transition">
+                      <div class="text-3xl mb-2">🏢</div>
+                      <div class="font-semibold">Owner</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Terms & Conditions -->
+              <div class="mb-6">
+                <label class="flex items-start cursor-pointer gap-3">
+                  <input 
+                    type="checkbox" 
+                    id="register-terms"
+                    class="mt-1"
+                    onchange="updateFormState()"
+                    required
+                  >
+                  <span class="text-sm text-gray-600">
+                    I agree to the <span class="text-gold font-medium">Terms & Conditions</span> and <span class="text-gold font-medium">Privacy Policy</span>
+                  </span>
+                </label>
+              </div>
+              
+              <!-- Submit Button -->
+              <button type="submit" id="register-btn" class="w-full btn-primary text-dark-blue py-4 rounded-xl font-bold text-lg mb-4 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Create Account
+              </button>
+              
+              <!-- Login Link -->
+              <p class="text-center text-gray-500 text-sm">
+                Already have an account? 
+                <a onclick="navigate('login')" class="text-gold font-semibold cursor-pointer hover:underline">Login</a>
+              </p>
+            </form>
+          </div>
+        </section>
+      `;
+    }
+    
+    function getDriverDashboard() {
+  console.log('Rendering driver dashboard for:', appState.currentUser);
+  console.log('All bookings:', appState.bookings);
+  
+  // Get user ID consistently
+  const userId = appState.currentUser?.__backendId || appState.currentUser?.id;
+  
+  // Filter bookings for current user
+  const userBookings = appState.bookings.filter(b => {
+    const matches = b.user_id == userId;
+    console.log(`Booking ${b.id}: user_id=${b.user_id}, matches=${matches}`);
+    return matches;
+  });
+  
+  console.log('User bookings found:', userBookings.length);
+  console.log('User bookings details:', userBookings);
+  
+  return `
+    <section class="py-8 bg-dark-blue">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-white mb-2">My Dashboard</h1>
+            <p class="text-gray-400">Welcome back, ${appState.currentUser.name}!</p>
+          </div>
+          <div class="bg-gold text-dark-blue px-4 py-2 rounded-xl font-bold">
+            🚛 Driver Account
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="py-8 bg-light-gray min-h-[60%]">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div class="bg-white p-6 rounded-xl shadow-lg text-center animate-fade-in stagger-1">
+            <div class="text-3xl font-bold text-dark-blue">${userBookings.filter(b => b.status === 'booked').length}</div>
+            <div class="text-gray-500 text-sm">Active Bookings</div>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-lg text-center animate-fade-in stagger-2">
+            <div class="text-3xl font-bold text-dark-blue">${userBookings.length}</div>
+            <div class="text-gray-500 text-sm">Total Bookings</div>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-lg text-center animate-fade-in stagger-3">
+            <div class="text-3xl font-bold text-dark-blue">${appState.reviews.filter(r => r.user_id == userId).length}</div>
+            <div class="text-gray-500 text-sm">Reviews Written</div>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-lg text-center animate-fade-in stagger-4">
+            <div class="text-3xl font-bold text-gold">TSh ${userBookings.reduce((total, b) => {
+              const station = appState.stations.find(s => (s.id || s.__backendId) == b.station_id);
+              return total + (station ? station.price_per_night : 0);
+            }, 0)}</div>
+            <div class="text-gray-500 text-sm">Total Spent</div>
+          </div>
+        </div>
+        
+        <!-- My Bookings -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 animate-fade-in">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-dark-blue">My Bookings (${userBookings.length})</h2>
+            <button onclick="navigate('stations')" class="btn-primary text-dark-blue px-4 py-2 rounded-xl font-medium">
+              + New Booking
+            </button>
+          </div>
+          
+          ${userBookings.length === 0 ? `
+            <div class="text-center py-12">
+              <div class="text-6xl mb-4">📅</div>
+              <h3 class="text-xl font-semibold text-dark-blue mb-2">No Bookings Yet</h3>
+              <p class="text-gray-500 mb-4">Find a parking station and make your first booking!</p>
+              <button onclick="navigate('stations')" class="btn-primary text-dark-blue px-6 py-3 rounded-xl font-medium">
+                Browse Stations
+              </button>
+            </div>
+          ` : `
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead>
+                  <tr class="border-b">
+                    <th class="text-left py-3 text-dark-blue font-semibold">Station</th>
+                    <th class="text-left py-3 text-dark-blue font-semibold">Date</th>
+                    <th class="text-left py-3 text-dark-blue font-semibold">Status</th>
+                    <th class="text-left py-3 text-dark-blue font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${userBookings.map(booking => {
+                    const station = appState.stations.find(s => (s.id || s.__backendId) == booking.station_id);
+                    return `
+                      <tr class="border-b hover:bg-light-gray transition">
+                        <td class="py-4">
+                          <div class="flex items-center">
+                            <div class="w-12 h-12 bg-dark-blue rounded-xl flex items-center justify-center text-white text-xl mr-3">🅿️</div>
+                            <div>
+                              <div class="font-semibold text-dark-blue">${station ? station.station_name : 'Unknown Station'}</div>
+                              <div class="text-sm text-gray-500">${station ? station.location : ''}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="py-4 text-gray-600">${new Date(booking.booking_date).toLocaleDateString()}</td>
+                        <td class="py-4">
+                          <span class="px-3 py-1 rounded-full text-sm font-medium ${
+                            booking.status === 'booked' 
+                              ? 'bg-green-100 text-green-600' 
+                              : 'bg-red-100 text-red-600'
+                          }">
+                            ${booking.status === 'booked' ? '✓ Booked' : '✗ Cancelled'}
+                          </span>
+                        </td>
+                        <td class="py-4">
+                          ${booking.status === 'booked' ? `
+                            <button onclick="cancelBooking('${booking.id || booking.__backendId}')" class="text-red-500 hover:text-red-700 font-medium">
+                              Cancel
+                            </button>
+                          ` : '—'}
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          `}
+        </div>
+      </div>
+    </section>
+  `;
+}
+    
+   function getOwnerDashboard() {
+  console.log('Rendering owner dashboard for:', appState.currentUser);
+  console.log('All stations:', appState.stations);
+  
+  // Safety check
+  if (!appState.currentUser || appState.currentUser.role !== 'owner') {
+    console.log('Not an owner, redirecting...');
+    navigate('home');
+    return '';
+  }
+  
+  // Get user ID - handle both formats
+  const userId = appState.currentUser.__backendId || appState.currentUser.id;
+  console.log('Filtering stations for owner ID:', userId);
+  
+  const ownerStations = appState.stations.filter(s => {
+    const matches = s.owner_id == userId; // Use == to compare regardless of type
+    console.log(`Station ${s.id} (${s.station_name}) owner_id: ${s.owner_id}, matches: ${matches}`);
+    return matches;
+  });
+  
+  console.log('Owner stations found:', ownerStations.length);
+  console.log('Owner stations details:', ownerStations);
+  
+  const stationIds = ownerStations.map(s => s.id || s.__backendId);
+  const ownerBookings = appState.bookings.filter(b => stationIds.includes(b.station_id));
+  
+  return `
+    <section class="py-8 bg-dark-blue">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-white mb-2">Owner Dashboard</h1>
+            <p class="text-gray-400">Welcome back, ${appState.currentUser.name}!</p>
+          </div>
+          <div class="bg-gold text-dark-blue px-4 py-2 rounded-xl font-bold">
+            🏢 Business Account
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="py-8 bg-light-gray min-h-[60%]">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div class="bg-white p-6 rounded-xl shadow-lg text-center animate-fade-in stagger-1">
+            <div class="text-3xl font-bold text-dark-blue">${ownerStations.length}</div>
+            <div class="text-gray-500 text-sm">My Stations</div>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-lg text-center animate-fade-in stagger-2">
+            <div class="text-3xl font-bold text-dark-blue">${ownerBookings.filter(b => b.status === 'booked').length}</div>
+            <div class="text-gray-500 text-sm">Active Bookings</div>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-lg text-center animate-fade-in stagger-3">
+            <div class="text-3xl font-bold text-dark-blue">${ownerStations.reduce((t, s) => t + s.total_slots, 0)}</div>
+            <div class="text-gray-500 text-sm">Total Slots</div>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-lg text-center animate-fade-in stagger-4">
+            <div class="text-3xl font-bold text-gold">TSh ${ownerBookings.reduce((total, b) => {
+              const station = appState.stations.find(s => (s.id || s.__backendId) === b.station_id);
+              return total + (station && b.status === 'booked' ? station.price_per_night : 0);
+            }, 0)}</div>
+            <div class="text-gray-500 text-sm">Revenue</div>
+          </div>
+        </div>
+        
+        <!-- My Stations -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 animate-fade-in">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-dark-blue">My Stations</h2>
+            <button onclick="openAddStationModal()" class="btn-primary text-dark-blue px-4 py-2 rounded-xl font-medium">
+              + Add Station
+            </button>
+          </div>
+          
+          ${ownerStations.length === 0 ? `
+            <div class="text-center py-12">
+              <div class="text-6xl mb-4">🏗️</div>
+              <h3 class="text-xl font-semibold text-dark-blue mb-2">No Stations Yet</h3>
+              <p class="text-gray-500 mb-4">Add your first parking station to start receiving bookings!</p>
+              <button onclick="openAddStationModal()" class="btn-primary text-dark-blue px-6 py-3 rounded-xl font-medium">
+                Add Your First Station
+              </button>
+            </div>
+          ` : `
+            <div class="grid md:grid-cols-2 gap-6">
+              ${ownerStations.map(station => {
+                const stationBookings = ownerBookings.filter(b => b.station_id === (station.id || station.__backendId) && b.status === 'booked');
+                return `
+                  <div class="border rounded-xl p-6 hover:shadow-lg transition">
+                    <div class="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 class="text-xl font-bold text-dark-blue">${station.station_name}</h3>
+                        <p class="text-gray-500">📍 ${station.location}</p>
+                      </div>
+                      <div class="flex space-x-2">
+                        <button onclick="openEditStationModal('${station.id || station.__backendId}')" class="text-gold hover:text-yellow-600">✏️</button>
+                        <button onclick="confirmDeleteStation('${station.id || station.__backendId}')" class="text-red-500 hover:text-red-700">🗑️</button>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                      <div class="bg-light-gray rounded-lg p-3">
+                        <div class="text-xl font-bold text-dark-blue">TSh ${station.price_per_night}</div>
+                        <div class="text-xs text-gray-500">Per Night</div>
+                      </div>
+                      <div class="bg-light-gray rounded-lg p-3">
+                        <div class="text-xl font-bold text-green-600">${station.available_slots}/${station.total_slots}</div>
+                        <div class="text-xs text-gray-500">Available</div>
+                      </div>
+                      <div class="bg-light-gray rounded-lg p-3">
+                        <div class="text-xl font-bold text-gold">${stationBookings.length}</div>
+                        <div class="text-xs text-gray-500">Bookings</div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </div>
+        
+        <!-- Recent Bookings -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 animate-fade-in">
+          <h2 class="text-2xl font-bold text-dark-blue mb-6">Recent Bookings</h2>
+          ${ownerBookings.length === 0 ? `
+            <div class="text-center py-8 text-gray-500">
+              <div class="text-4xl mb-4">📋</div>
+              <p>No bookings received yet</p>
+            </div>
+          ` : `
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead>
+                  <tr class="border-b">
+                    <th class="text-left py-3 text-dark-blue font-semibold">Driver</th>
+                    <th class="text-left py-3 text-dark-blue font-semibold">Station</th>
+                    <th class="text-left py-3 text-dark-blue font-semibold">Date</th>
+                    <th class="text-left py-3 text-dark-blue font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${ownerBookings.slice(0, 10).map(booking => {
+                    const driver = appState.users.find(u => (u.__backendId || u.id) === booking.user_id);
+                    const station = ownerStations.find(s => (s.id || s.__backendId) === booking.station_id);
+                    return `
+                      <tr class="border-b hover:bg-light-gray transition">
+                        <td class="py-4">
+                          <div class="flex items-center">
+                            <div class="w-10 h-10 bg-dark-blue rounded-full flex items-center justify-center text-white font-bold mr-3">
+                              ${driver ? driver.name.charAt(0) : '?'}
+                            </div>
+                            <div>
+                              <div class="font-semibold text-dark-blue">${driver ? driver.name : 'Unknown'}</div>
+                              <div class="text-sm text-gray-500">${driver ? driver.email : ''}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="py-4 text-gray-600">${station ? station.station_name : 'Unknown'}</td>
+                        <td class="py-4 text-gray-600">${new Date(booking.booking_date).toLocaleDateString()}</td>
+                        <td class="py-4">
+                          <span class="px-3 py-1 rounded-full text-sm font-medium ${
+                            booking.status === 'booked' 
+                              ? 'bg-green-100 text-green-600' 
+                              : 'bg-red-100 text-red-600'
+                          }">
+                            ${booking.status === 'booked' ? '✓ Booked' : '✗ Cancelled'}
+                          </span>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          `}
+        </div>
+      </div>
+    </section>
+  `;
+}
+    
+    // ===== MODALS =====
+    
+     function openBookingModal(stationId) {
+  const station = appState.stations.find(s => 
+    s.id == stationId || s.__backendId == stationId
+  );
+  
+  if (!station) {
+    showToast('Station not found', 'error');
+    return;
+  }
+  
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split('T')[0];
+  
+  openModal(`
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-dark-blue">Book Parking Slot</h2>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+      </div>
+      
+      <div class="bg-light-gray rounded-xl p-4 mb-6">
+        <h3 class="font-semibold text-dark-blue">${station.station_name}</h3>
+        <p class="text-gray-500 text-sm">📍 ${station.location}</p>
+        <p class="text-gold font-bold mt-2">TSh ${station.price_per_night}/night</p>
+      </div>
+      
+      <form onsubmit="handleBooking(event, '${station.id || station.__backendId}')">
+        <div class="mb-6">
+          <label class="block text-dark-blue font-medium mb-2">Select Date</label>
+          <input 
+            type="date" 
+            id="booking-date"
+            class="w-full px-4 py-3 rounded-xl input-styled"
+            min="${minDate}"
+            required
+          >
+        </div>
+        
+        <div class="flex gap-4">
+          <button type="button" onclick="closeModal()" class="flex-1 border-2 border-gray-200 text-gray-600 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
+            Cancel
+          </button>
+          <button type="submit" id="booking-btn" class="flex-1 btn-primary text-dark-blue py-3 rounded-xl font-bold">
+            Confirm Booking
+          </button>
+        </div>
+      </form>
+    </div>
+  `);
+}
+    
+    function openReviewModal(stationId) {
+      openModal(`
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-dark-blue">Write a Review</h2>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+          </div>
+          
+          <form onsubmit="handleReview(event, '${stationId}')">
+            <div class="mb-6">
+              <label class="block text-dark-blue font-medium mb-2">Rating</label>
+              <div class="flex gap-2" id="star-rating">
+                ${[1,2,3,4,5].map(i => `
+                  <span class="star text-4xl ${i <= 5 ? 'active' : 'inactive'}" data-rating="${i}" onclick="setRating(${i})">★</span>
+                `).join('')}
+              </div>
+              <input type="hidden" id="review-rating" value="5">
+            </div>
+            
+            <div class="mb-6">
+              <label class="block text-dark-blue font-medium mb-2">Your Review</label>
+              <textarea 
+                id="review-comment"
+                class="w-full px-4 py-3 rounded-xl input-styled h-32"
+                placeholder="Share your experience..."
+              ></textarea>
+            </div>
+            
+            <div class="flex gap-4">
+              <button type="button" onclick="closeModal()" class="flex-1 border-2 border-gray-200 text-gray-600 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
+                Cancel
+              </button>
+              <button type="submit" id="review-btn" class="flex-1 btn-primary text-dark-blue py-3 rounded-xl font-bold">
+                Submit Review
+              </button>
+            </div>
+          </form>
+        </div>
+      `);
+    }
+    
+    function setRating(rating) {
+      document.getElementById('review-rating').value = rating;
+      const stars = document.querySelectorAll('#star-rating .star');
+      stars.forEach((star, index) => {
+        star.classList.toggle('active', index < rating);
+        star.classList.toggle('inactive', index >= rating);
+      });
+    }
+    
+   function openAddStationModal() {
+  openModal(`
+    <div class="p-6 max-h-[80vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-dark-blue">Add New Station</h2>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+      </div>
+      
+      <form onsubmit="handleAddStation(event)">
+        <div class="mb-4">
+          <label class="block text-dark-blue font-medium mb-2">Station Name</label>
+          <input 
+            type="text" 
+            id="station-name"
+            class="w-full px-4 py-3 rounded-xl input-styled"
+            placeholder="Ubungo Bus Terminal"
+            required
+          >
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-dark-blue font-medium mb-2">Location</label>
+          <input 
+            type="text" 
+            id="station-location"
+            class="w-full px-4 py-3 rounded-xl input-styled"
+            placeholder="Dar es Salaam"
+            required
+          >
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-dark-blue font-medium mb-2">Price/Night (TSh)</label>
+            <input 
+              type="number" 
+              id="station-price"
+              class="w-full px-4 py-3 rounded-xl input-styled"
+              placeholder="25000"
+              min="1"
+              required
+            >
+          </div>
+          <div>
+            <label class="block text-dark-blue font-medium mb-2">Total Slots</label>
+            <input 
+              type="number" 
+              id="station-slots"
+              class="w-full px-4 py-3 rounded-xl input-styled"
+              placeholder="20"
+              min="1"
+              required
+            >
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-dark-blue font-medium mb-2">Security Features</label>
+          <div class="flex flex-wrap gap-2">
+            ${['CCTV', 'Guard', 'Fence', 'Lighting', 'Gate'].map(f => `
+              <label class="cursor-pointer">
+                <input type="checkbox" name="security" value="${f}" class="hidden peer">
+                <span class="peer-checked:bg-dark-blue peer-checked:text-white bg-light-gray text-gray-600 px-3 py-2 rounded-lg text-sm inline-block transition">
+                  ${f}
+                </span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="mb-6">
+          <label class="block text-dark-blue font-medium mb-2">Amenities</label>
+          <div class="flex flex-wrap gap-2">
+            ${['Toilet', 'Shower', 'Food', 'WiFi', 'Rest Area', 'Shop'].map(a => `
+              <label class="cursor-pointer">
+                <input type="checkbox" name="amenities" value="${a}" class="hidden peer">
+                <span class="peer-checked:bg-gold peer-checked:text-dark-blue bg-light-gray text-gray-600 px-3 py-2 rounded-lg text-sm inline-block transition">
+                  ${a}
+                </span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="flex gap-4">
+          <button type="button" onclick="closeModal()" class="flex-1 border-2 border-gray-200 text-gray-600 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
+            Cancel
+          </button>
+          <button type="submit" id="add-station-btn" class="flex-1 btn-primary text-dark-blue py-3 rounded-xl font-bold">
+            Add Station
+          </button>
+        </div>
+      </form>
+    </div>
+  `);
+}
+    
+    function openEditStationModal(stationId) {
+  console.log('Opening edit modal for station ID:', stationId);
+  
+  const station = appState.stations.find(s => 
+    s.id == stationId || s.__backendId == stationId
+  );
+  
+  if (!station) {
+    console.error('Station not found:', stationId);
+    showToast('Station not found', 'error');
+    return;
+  }
+  
+  console.log('Editing station:', station);
+  
+  const security = station.security_features ? station.security_features.split(',').map(s => s.trim()) : [];
+  const amenities = station.amenities ? station.amenities.split(',').map(s => s.trim()) : [];
+  
+  openModal(`
+    <div class="p-6 max-h-[80vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-dark-blue">Edit Station</h2>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+      </div>
+      
+      <form onsubmit="handleEditStation(event, '${station.id || station.__backendId}')">
+        <div class="mb-4">
+          <label class="block text-dark-blue font-medium mb-2">Station Name</label>
+          <input 
+            type="text" 
+            id="edit-station-name"
+            class="w-full px-4 py-3 rounded-xl input-styled"
+            value="${station.station_name}"
+            required
+          >
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-dark-blue font-medium mb-2">Location</label>
+          <input 
+            type="text" 
+            id="edit-station-location"
+            class="w-full px-4 py-3 rounded-xl input-styled"
+            value="${station.location}"
+            required
+          >
+        </div>
+        
+        <div class="grid grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="block text-dark-blue font-medium mb-2">Price/Night</label>
+            <input 
+              type="number" 
+              id="edit-station-price"
+              class="w-full px-4 py-3 rounded-xl input-styled"
+              value="${station.price_per_night}"
+              min="1"
+              required
+            >
+          </div>
+          <div>
+            <label class="block text-dark-blue font-medium mb-2">Total Slots</label>
+            <input 
+              type="number" 
+              id="edit-station-total"
+              class="w-full px-4 py-3 rounded-xl input-styled"
+              value="${station.total_slots}"
+              min="1"
+              required
+            >
+          </div>
+          <div>
+            <label class="block text-dark-blue font-medium mb-2">Available</label>
+            <input 
+              type="number" 
+              id="edit-station-available"
+              class="w-full px-4 py-3 rounded-xl input-styled"
+              value="${station.available_slots}"
+              min="0"
+              max="${station.total_slots}"
+              required
+            >
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-dark-blue font-medium mb-2">Security Features</label>
+          <div class="flex flex-wrap gap-2">
+            ${['CCTV', 'Guard', 'Fence', 'Lighting', 'Gate'].map(f => `
+              <label class="cursor-pointer">
+                <input type="checkbox" name="edit-security" value="${f}" class="hidden peer" ${security.includes(f) ? 'checked' : ''}>
+                <span class="peer-checked:bg-dark-blue peer-checked:text-white bg-light-gray text-gray-600 px-3 py-2 rounded-lg text-sm inline-block transition">
+                  ${f}
+                </span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="mb-6">
+          <label class="block text-dark-blue font-medium mb-2">Amenities</label>
+          <div class="flex flex-wrap gap-2">
+            ${['Toilet', 'Shower', 'Food', 'WiFi', 'Rest Area', 'Shop'].map(a => `
+              <label class="cursor-pointer">
+                <input type="checkbox" name="edit-amenities" value="${a}" class="hidden peer" ${amenities.includes(a) ? 'checked' : ''}>
+                <span class="peer-checked:bg-gold peer-checked:text-dark-blue bg-light-gray text-gray-600 px-3 py-2 rounded-lg text-sm inline-block transition">
+                  ${a}
+                </span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="flex gap-4">
+          <button type="button" onclick="closeModal()" class="flex-1 border-2 border-gray-200 text-gray-600 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
+            Cancel
+          </button>
+          <button type="submit" id="edit-station-btn" class="flex-1 btn-primary text-dark-blue py-3 rounded-xl font-bold">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  `);
+}
+    
+    // ===== PASSWORD VALIDATION =====
+function updatePasswordStrength() {
+  const password = document.getElementById('register-password').value;
+  const requirements = {
+    length: password.length >= 8,
+    upper: /[A-Z]/.test(password),
+    lower: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[!@#$%^&*]/.test(password)
+  };
+  
+  // Update requirement indicators
+  document.getElementById('req-length').innerHTML = requirements.length 
+    ? '✓ 8+ characters' 
+    : '○ 8+ characters';
+  document.getElementById('req-length').className = 'text-xs ' + (requirements.length ? 'text-green-600 font-medium' : 'text-gray-400');
+  
+  document.getElementById('req-upper').innerHTML = requirements.upper 
+    ? '✓ Uppercase (A-Z)' 
+    : '○ Uppercase (A-Z)';
+  document.getElementById('req-upper').className = 'text-xs ' + (requirements.upper ? 'text-green-600 font-medium' : 'text-gray-400');
+  
+  document.getElementById('req-lower').innerHTML = requirements.lower 
+    ? '✓ Lowercase (a-z)' 
+    : '○ Lowercase (a-z)';
+  document.getElementById('req-lower').className = 'text-xs ' + (requirements.lower ? 'text-green-600 font-medium' : 'text-gray-400');
+  
+  document.getElementById('req-number').innerHTML = requirements.number 
+    ? '✓ Number (0-9)' 
+    : '○ Number (0-9)';
+  document.getElementById('req-number').className = 'text-xs ' + (requirements.number ? 'text-green-600 font-medium' : 'text-gray-400');
+  
+  document.getElementById('req-special').innerHTML = requirements.special 
+    ? '✓ Special (!@#$%^&*)' 
+    : '○ Special (!@#$%^&*)';
+  document.getElementById('req-special').className = 'text-xs ' + (requirements.special ? 'text-green-600 font-medium' : 'text-gray-400');
+  
+  // Update strength bars
+  const metCount = Object.values(requirements).filter(Boolean).length;
+  for (let i = 1; i <= 5; i++) {
+    const bar = document.getElementById(`strength-${i}`);
+    if (i <= metCount) {
+      bar.className = 'strength-bar flex-1 h-2 rounded-full ' + 
+        (metCount <= 2 ? 'bg-red-500' : 
+         metCount <= 3 ? 'bg-yellow-500' : 
+         metCount <= 4 ? 'bg-blue-500' : 
+         'bg-green-500');
+    } else {
+      bar.className = 'strength-bar flex-1 h-2 rounded-full bg-gray-200';
+    }
+  }
+  
+  // Update strength text
+  const strengthText = document.getElementById('strength-text');
+  if (metCount === 0) {
+    strengthText.textContent = 'Requirements: (0/5)';
+    strengthText.className = 'text-xs text-gray-400';
+  } else if (metCount <= 2) {
+    strengthText.textContent = `Weak password (${metCount}/5)`;
+    strengthText.className = 'text-xs text-red-500 font-medium';
+  } else if (metCount <= 3) {
+    strengthText.textContent = `Fair password (${metCount}/5)`;
+    strengthText.className = 'text-xs text-yellow-600 font-medium';
+  } else if (metCount <= 4) {
+    strengthText.textContent = `Good password (${metCount}/5)`;
+    strengthText.className = 'text-xs text-blue-600 font-medium';
+  } else {
+    strengthText.textContent = 'Strong password! ✓ (5/5)';
+    strengthText.className = 'text-xs text-green-600 font-medium';
+  }
+  
+  updateFormState();
+}
+
+function updatePasswordMatch() {
+  const password = document.getElementById('register-password').value;
+  const confirmPassword = document.getElementById('register-confirm-password').value;
+  const matchStatus = document.getElementById('password-match-status');
+  
+  if (confirmPassword === '') {
+    matchStatus.innerHTML = '○ Passwords must match';
+    matchStatus.className = 'text-xs text-gray-400 mt-1';
+  } else if (password === confirmPassword) {
+    matchStatus.innerHTML = '✓ Passwords match';
+    matchStatus.className = 'text-xs text-green-600 font-medium mt-1';
+  } else {
+    matchStatus.innerHTML = '✗ Passwords do not match';
+    matchStatus.className = 'text-xs text-red-500 font-medium mt-1';
+  }
+  
+  updateFormState();
+}
+
+function updateFormState() {
+  const btn = document.getElementById('register-btn');
+  const password = document.getElementById('register-password').value;
+  const confirmPassword = document.getElementById('register-confirm-password').value;
+  const termsAccepted = document.getElementById('register-terms').checked;
+  
+  const passwordReqs = {
+    length: password.length >= 8,
+    upper: /[A-Z]/.test(password),
+    lower: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[!@#$%^&*]/.test(password)
+  };
+  
+  const allPasswordMet = Object.values(passwordReqs).every(Boolean);
+  const passwordsMatch = password === confirmPassword && password !== '';
+  const isEnabled = allPasswordMet && passwordsMatch && termsAccepted;
+  
+  btn.disabled = !isEnabled;
+}
+
+// ===== AUTH FUNCTIONS =====
+async function handleLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.textContent = 'Logging in...';
+  
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  
+  try {
+    const response = await fetch('users.php?action=login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    
+    const result = await response.json();
+    console.log('Login result:', result);
+    
+    if (result.success && result.data && result.data.user) {
+      // Save user to appState
+      appState.currentUser = result.data.user;
+      
+      // Save to localStorage
+      localStorage.setItem('truckpark_user', JSON.stringify(result.data.user));
+      
+      showToast(`Welcome back, ${result.data.user.name}!`, 'success');
+      updateAuthNav();
+      
+      // Navigate based on role
+      if (result.data.user.role === 'owner') {
+        navigate('owner-dashboard');
+      } else {
+        navigate('driver-dashboard');
+      }
+    } else {
+      showToast(result.message || 'Invalid email or password', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Login';
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    showToast('Login failed. Please try again.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Login';
+  }
+}
+async function handleRegister(e) {
+  e.preventDefault();
+  
+  const btn = document.getElementById('register-btn');
+  const name = document.getElementById('register-name').value.trim();
+  const email = document.getElementById('register-email').value.trim();
+  const password = document.getElementById('register-password').value;
+  const confirmPassword = document.getElementById('register-confirm-password').value;
+  const role = document.querySelector('input[name="role"]:checked').value;
+  const termsAccepted = document.getElementById('register-terms').checked;
+  
+  // Validation (same as before)
+  // ... validation code ...
+  
+  btn.disabled = true;
+  btn.textContent = 'Creating account...';
+  
+  try {
+    // URL moja kwa moja kwa users.php
+    const response = await fetch('users.php?action=register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        password: password,
+        role: role
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showToast('✓ Account created successfully! Please login.', 'success');
+      setTimeout(() => navigate('login'), 1500);
+    } else {
+      showToast(result.message || 'Registration failed. Please try again.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Create Account';
+    }
+  } catch (error) {
+    console.error('Registration error:', error);
+    showToast('Registration failed. Please check your connection.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+  }
+}
+
+function logout() {
+  // Clear from appState
+  appState.currentUser = null;
+  
+  // Remove from localStorage
+  localStorage.removeItem('truckpark_user');
+  
+  updateAuthNav();
+  showToast('Logged out successfully', 'success');
+  navigate('home');
+}
+    
+    
+   async function handleBooking(e, stationId) {
+  e.preventDefault();
+  
+  console.log('🚀 handleBooking called for station:', stationId);
+  
+  const btn = document.getElementById('booking-btn');
+  btn.disabled = true;
+  btn.textContent = 'Booking...';
+  
+  const bookingDate = document.getElementById('booking-date').value;
+  const userId = appState.currentUser?.__backendId || appState.currentUser?.id;
+  
+  if (!userId) {
+    showToast('Please login first', 'error');
+    navigate('login');
+    return;
+  }
+  
+  const bookingData = {
+    user_id: userId,
+    station_id: stationId,
+    booking_date: bookingDate
+  };
+  
+  // Check if online
+  if (!navigator.onLine) {
+    // Save offline and sync later
+    try {
+      await saveOfflineBooking(bookingData);
+      closeModal();
+      showToast('📱 Booking saved offline. Will sync when online.', 'success');
+      
+      // Add to local state
+      const tempBooking = {
+        ...bookingData,
+        id: 'offline-' + Date.now(),
+        status: 'booked',
+        created_at: new Date().toISOString()
+      };
+      appState.bookings.push(tempBooking);
+      
+      navigate('driver-dashboard');
+    } catch (error) {
+      console.error('Offline save error:', error);
+      showToast('Failed to save offline', 'error');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Confirm Booking';
+    return;
+  }
+  
+  // Online - normal booking
+  try {
+    const bookingResponse = await fetch('bookings.php?action=create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookingData)
+    });
+    
+    const bookingResult = await bookingResponse.json();
+    
+    if (bookingResult.success) {
+      await Promise.all([
+        fetchStations(),
+        fetchBookings(),
+        fetchReviews()
+      ]);
+      
+      closeModal();
+      showToast('✅ Booking confirmed!', 'success');
+      navigate('driver-dashboard');
+    } else {
+      showToast(bookingResult.message || 'Booking failed', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Confirm Booking';
+    }
+  } catch (error) {
+    console.error('Booking error:', error);
+    showToast('Booking failed. Please try again.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Confirm Booking';
+  }
+}
+// Function to fetch bookings
+// Function to fetch bookings
+async function fetchBookings() {
+  console.log('Fetching bookings from server...');
+  try {
+    const response = await fetch('bookings.php');
+    console.log('Fetch bookings response status:', response.status);
+    
+    const result = await response.json();
+    console.log('Fetch bookings result:', result);
+    
+    if (result.success && result.data) {
+      appState.bookings = result.data;
+      console.log('✅ Bookings updated:', appState.bookings.length, 'bookings');
+      return true;
+    } else {
+      console.error('❌ Failed to fetch bookings:', result.message);
+      return false;
+    }
+  } catch (error) {
+    console.error('💥 Fetch bookings error:', error);
+    return false;
+  }
+}
+    
+    async function cancelBooking(bookingId) {
+  console.log('cancelBooking called for ID:', bookingId);
+  
+  if (!confirm('Are you sure you want to cancel this booking?')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`bookings.php?action=cancel&id=${bookingId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    console.log('Cancel response status:', response.status);
+    
+    const result = await response.json();
+    console.log('Cancel result:', result);
+    
+    if (result.success) {
+      showToast('Booking cancelled successfully', 'success');
+      
+      // Refresh data
+      await Promise.all([
+        fetchStations(),
+        fetchBookings()
+      ]);
+      
+      // Refresh current page
+      if (appState.currentUser.role === 'driver') {
+        navigate('driver-dashboard');
+      } else {
+        navigate('owner-dashboard');
+      }
+    } else {
+      showToast(result.message || 'Failed to cancel booking', 'error');
+    }
+  } catch (error) {
+    console.error('Cancel booking error:', error);
+    showToast('Failed to cancel booking', 'error');
+  }
+}
+    
+   async function handleReview(e, stationId) {
+  e.preventDefault();
+  
+  console.log('handleReview called for station:', stationId);
+  
+  if (appState.reviews.length >= 999) {
+    showToast('Maximum reviews reached.', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('review-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  
+  const rating = parseInt(document.getElementById('review-rating').value);
+  const comment = document.getElementById('review-comment').value;
+  
+  // Get user ID consistently
+  const userId = appState.currentUser.__backendId || appState.currentUser.id;
+  
+  console.log('Submitting review:', { userId, stationId, rating, comment });
+  
+  try {
+    const response = await fetch('reviews.php?action=create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        station_id: stationId,
+        rating: rating,
+        comment: comment
+      })
+    });
+    
+    console.log('Response status:', response.status);
+    
+    const result = await response.json();
+    console.log('Review result:', result);
+    
+    if (result.success) {
+      closeModal();
+      showToast('Review submitted!', 'success');
+      
+      // Refresh reviews
+      await fetchReviews();
+      
+      // Refresh the page to show new review
+      console.log('Refreshing station details...');
+      navigate('station-details', { stationId });
+    } else {
+      showToast(result.message || 'Failed to submit review', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Submit Review';
+    }
+  } catch (error) {
+    console.error('Review error:', error);
+    showToast('Failed to submit review. Please try again.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Submit Review';
+  }
+}
+// Function to fetch reviews
+async function fetchReviews() {
+  try {
+    const response = await fetch('reviews.php');
+    const result = await response.json();
+    if (result.success && result.data) {
+      appState.reviews = result.data;
+      console.log('Reviews updated:', appState.reviews.length);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Fetch reviews error:', error);
+    return false;
+  }
+}
+
+    
+    
+  async function handleAddStation(e) {
+  e.preventDefault();
+  
+  console.log('handleAddStation called');
+  
+  if (appState.stations.length >= 999) {
+    showToast('Maximum stations reached.', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('add-station-btn');
+  btn.disabled = true;
+  btn.textContent = 'Adding...';
+  
+  // Get form values
+  const name = document.getElementById('station-name').value.trim();
+  const location = document.getElementById('station-location').value.trim();
+  const price = parseInt(document.getElementById('station-price').value);
+  const slots = parseInt(document.getElementById('station-slots').value);
+  
+  console.log('Form values:', { name, location, price, slots });
+  
+  // Validate
+  if (!name || !location || !price || !slots) {
+    showToast('Please fill all required fields', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Add Station';
+    return;
+  }
+  
+  // Get checkboxes
+  const securityChecked = Array.from(document.querySelectorAll('input[name="security"]:checked')).map(cb => cb.value);
+  const amenitiesChecked = Array.from(document.querySelectorAll('input[name="amenities"]:checked')).map(cb => cb.value);
+  
+  console.log('Security:', securityChecked);
+  console.log('Amenities:', amenitiesChecked);
+  console.log('Current user:', appState.currentUser);
+  
+  // Prepare data
+  const stationData = {
+    owner_id: appState.currentUser.__backendId || appState.currentUser.id,
+    station_name: name,
+    location: location,
+    price_per_night: price,
+    total_slots: slots,
+    available_slots: slots,
+    security_features: securityChecked.join(', '),
+    amenities: amenitiesChecked.join(', ')
+  };
+  
+  console.log('Sending data:', stationData);
+  
+  try {
+    const response = await fetch('stations.php?action=create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(stationData)
+    });
+    
+    console.log('Response status:', response.status);
+    
+    // Get response text first
+    const responseText = await response.text();
+    console.log('Raw response:', responseText);
+    
+    // Try to parse as JSON
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Failed to parse JSON:', e);
+      showToast('Server returned invalid response', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Add Station';
+      return;
+    }
+    
+    console.log('Parsed result:', result);
+    
+    if (result.success) {
+      closeModal();
+      showToast('Station added successfully!', 'success');
+      
+      // Refresh stations data
+      await fetchStations();
+      
+      navigate('owner-dashboard');
+    } else {
+      showToast(result.message || 'Failed to add station', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Add Station';
+    }
+  } catch (error) {
+    console.error('Add station error:', error);
+    showToast('Failed to add station. Please try again.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Add Station';
+  }
+}
+
+
+
+// Function to fetch stations from server
+async function fetchStations() {
+  console.log('Fetching stations from server...');
+  try {
+    const response = await fetch('stations.php');
+    console.log('Fetch stations response status:', response.status);
+    
+    const result = await response.json();
+    console.log('Fetch stations result:', result);
+    
+    if (result.success && result.data) {
+      appState.stations = result.data;
+      console.log('Stations updated:', appState.stations.length, 'stations');
+      return true;
+    } else {
+      console.error('Failed to fetch stations:', result.message);
+      return false;
+    }
+  } catch (error) {
+    console.error('Fetch stations error:', error);
+    return false;
+  }
+}
+
+
+    
+    async function handleAddStation(e) {
+  e.preventDefault();
+  
+  console.log('handleAddStation called');
+  
+  if (appState.stations.length >= 999) {
+    showToast('Maximum stations reached.', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('add-station-btn');
+  btn.disabled = true;
+  btn.textContent = 'Adding...';
+  
+  // Get form values
+  const name = document.getElementById('station-name').value.trim();
+  const location = document.getElementById('station-location').value.trim();
+  const price = parseInt(document.getElementById('station-price').value);
+  const slots = parseInt(document.getElementById('station-slots').value);
+  
+  console.log('Form values:', { name, location, price, slots });
+  
+  // Validate
+  if (!name || !location || !price || !slots) {
+    showToast('Please fill all required fields', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Add Station';
+    return;
+  }
+  
+  // Get checkboxes
+  const securityChecked = Array.from(document.querySelectorAll('input[name="security"]:checked')).map(cb => cb.value);
+  const amenitiesChecked = Array.from(document.querySelectorAll('input[name="amenities"]:checked')).map(cb => cb.value);
+  
+  console.log('Security:', securityChecked);
+  console.log('Amenities:', amenitiesChecked);
+  console.log('Current user:', appState.currentUser);
+  
+  // Get user ID - handle both __backendId and id formats
+  const userId = appState.currentUser.__backendId || appState.currentUser.id;
+  console.log('User ID:', userId);
+  
+  // Prepare data
+  const stationData = {
+    owner_id: userId,
+    station_name: name,
+    location: location,
+    price_per_night: price,
+    total_slots: slots,
+    available_slots: slots,
+    security_features: securityChecked.join(', '),
+    amenities: amenitiesChecked.join(', ')
+  };
+  
+  console.log('Sending data:', stationData);
+  
+  try {
+    const response = await fetch('stations.php?action=create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(stationData)
+    });
+    
+    console.log('Response status:', response.status);
+    
+    const result = await response.json();
+    console.log('Add station result:', result);
+    
+    if (result.success) {
+      showToast('Station added successfully!', 'success');
+      closeModal();
+      
+      // IMPORTANT: Wait for stations to refresh
+      console.log('Refreshing stations...');
+      await fetchStations();
+      
+      // Navigate to refresh the dashboard
+      console.log('Navigating to owner dashboard');
+      navigate('owner-dashboard');
+    } else {
+      showToast(result.message || 'Failed to add station', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Add Station';
+    }
+  } catch (error) {
+    console.error('Add station error:', error);
+    showToast('Failed to add station. Please try again.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Add Station';
+  }
+}
+    
+    function confirmDeleteStation(stationId) {
+      openModal(`
+        <div class="p-6 text-center">
+          <div class="text-6xl mb-4">⚠️</div>
+          <h2 class="text-2xl font-bold text-dark-blue mb-2">Delete Station?</h2>
+          <p class="text-gray-500 mb-6">This action cannot be undone. All bookings for this station will be affected.</p>
+          <div class="flex gap-4">
+            <button onclick="closeModal()" class="flex-1 border-2 border-gray-200 text-gray-600 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
+              Cancel
+            </button>
+            <button onclick="deleteStation('${stationId}')" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold transition">
+              Delete
+            </button>
+          </div>
+        </div>
+      `);
+    }
+    
+   async function deleteStation(stationId) {
+  console.log('deleteStation called for ID:', stationId);
+  
+  try {
+    const response = await fetch(`stations.php?action=delete&id=${stationId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    console.log('Delete response status:', response.status);
+    
+    const result = await response.json();
+    console.log('Delete result:', result);
+    
+    if (result.success) {
+      closeModal();
+      showToast('Station deleted successfully', 'success');
+      
+      // Refresh stations
+      await fetchStations();
+      
+      // Refresh dashboard
+      navigate('owner-dashboard');
+    } else {
+      showToast(result.message || 'Failed to delete station', 'error');
+    }
+  } catch (error) {
+    console.error('Delete station error:', error);
+    showToast('Failed to delete station', 'error');
+  }
+}
+    
+    // ===== PAGE RENDERER =====
+    function renderPage(page, data = null) {
+  const main = document.getElementById('main-content');
+  console.log('Rendering page:', page, 'Current user:', appState.currentUser);
+  
+  // Check localStorage for user if appState is empty
+  if (!appState.currentUser) {
+    const savedUser = localStorage.getItem('truckpark_user');
+    if (savedUser) {
+      try {
+        appState.currentUser = JSON.parse(savedUser);
+        console.log('Restored user from localStorage in renderPage:', appState.currentUser);
+      } catch (e) {
+        console.error('Failed to parse saved user:', e);
+      }
+    }
+  }
+  
+  switch(page) {
+    case 'home':
+      main.innerHTML = getHomePage();
+      break;
+    case 'stations':
+      main.innerHTML = getStationsPage();
+      break;
+    case 'station-details':
+      main.innerHTML = getStationDetailsPage(data?.stationId);
+      break;
+    case 'login':
+      main.innerHTML = getLoginPage();
+      break;
+    case 'register':
+      main.innerHTML = getRegisterPage();
+      break;
+    case 'driver-dashboard':
+      if (!appState.currentUser || appState.currentUser.role !== 'driver') {
+        console.log('Not a driver, redirecting to login');
+        navigate('login');
+        return;
+      }
+      main.innerHTML = getDriverDashboard();
+      break;
+    case 'owner-dashboard':
+      if (!appState.currentUser || appState.currentUser.role !== 'owner') {
+        console.log('Not an owner, redirecting to login. Current role:', appState.currentUser?.role);
+        navigate('login');
+        return;
+      }
+      console.log('Rendering owner dashboard');
+      main.innerHTML = getOwnerDashboard();
+      break;
+    default:
+      main.innerHTML = getHomePage();
+  }
+}
+    
+    // ===== ELEMENT SDK =====
+    async function onConfigChange(cfg) {
+      config = { ...defaultConfig, ...cfg };
+      
+      // Update nav title
+      const navTitle = document.getElementById('nav-title');
+      if (navTitle) navTitle.textContent = config.app_title || defaultConfig.app_title;
+      
+      // Update footer title
+      const footerTitle = document.getElementById('footer-title');
+      if (footerTitle) footerTitle.textContent = config.app_title || defaultConfig.app_title;
+      
+      // Update hero elements if on home page
+      const heroTitle = document.getElementById('hero-title');
+      if (heroTitle) heroTitle.textContent = config.app_title || defaultConfig.app_title;
+      
+      const heroTagline = document.getElementById('hero-tagline');
+      if (heroTagline) heroTagline.textContent = config.tagline || defaultConfig.tagline;
+      
+      const heroCta = document.getElementById('hero-cta');
+      if (heroCta) heroCta.textContent = config.cta_button_text || defaultConfig.cta_button_text;
+    }
+    
+    // ===== INITIALIZATION =====
+   async function init() {
+  console.log('Fetching initial data...');
+  
+  // Check if user exists in localStorage
+  const savedUser = localStorage.getItem('truckpark_user');
+  if (savedUser) {
+    try {
+      appState.currentUser = JSON.parse(savedUser);
+      console.log('Restored user from localStorage:', appState.currentUser);
+    } catch (e) {
+      console.error('Failed to parse saved user:', e);
+      localStorage.removeItem('truckpark_user');
+    }
+  }
+  
+  try {
+    // Fetch all data in parallel
+    await Promise.all([
+      fetchStations(),
+      fetchBookings(),
+      fetchReviews(),
+      fetchUsers()
+    ]);
+    
+    console.log('All data fetched successfully');
+    console.log('Stations:', appState.stations.length);
+    console.log('Bookings:', appState.bookings.length);
+    console.log('Reviews:', appState.reviews.length);
+    console.log('Users:', appState.users.length);
+    
+  } catch (error) {
+    console.error('Failed to fetch initial data:', error);
+  }
+  
+  // Initial render
+  updateAuthNav();
+  
+  // Navigate to appropriate page
+  if (appState.currentUser) {
+    // If user is logged in, go to their dashboard
+    if (appState.currentUser.role === 'owner') {
+      renderPage('owner-dashboard');
+    } else {
+      renderPage('driver-dashboard');
+    }
+  } else {
+    // If no user, go to home
+    renderPage('home');
+  }
+}
+
+// Function to fetch users
+async function fetchUsers() {
+  try {
+    const response = await fetch('users.php');
+    const result = await response.json();
+    if (result.success && result.data) {
+      appState.users = result.data;
+      console.log('Users updated:', appState.users.length);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Fetch users error:', error);
+    return false;
+  }
+}
+    
+    init();
+ // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/truckpark/service-worker.js')
+        .then(registration => {
+          console.log('ServiceWorker registered: ', registration);
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed: ', error);
+        });
+    });
+  }
+
+  // Online/Offline detection
+  function updateOnlineStatus() {
+    const status = navigator.onLine ? 'online' : 'offline';
+    console.log('App is:', status);
+    
+    if (!navigator.onLine) {
+      showToast('You are offline. Some features may be limited.', 'warning');
+    }
+  }
+
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+
+
+  // Pull to refresh functionality
+let startY = 0;
+let pulling = false;
+
+document.addEventListener('touchstart', (e) => {
+  if (window.scrollY === 0) {
+    startY = e.touches[0].clientY;
+    pulling = true;
+  }
+});
+
+document.addEventListener('touchmove', (e) => {
+  if (!pulling) return;
+  
+  const currentY = e.touches[0].clientY;
+  const diff = currentY - startY;
+  
+  if (diff > 0 && diff < 100) {
+    const ptr = document.querySelector('.ptr-element');
+    if (ptr) {
+      ptr.style.transform = `translateY(${diff - 50}px)`;
+    }
+  }
+});
+
+document.addEventListener('touchend', (e) => {
+  if (!pulling) return;
+  
+  const ptr = document.querySelector('.ptr-element');
+  if (ptr) {
+    ptr.style.transform = 'translateY(-50px)';
+    // Refresh data
+    Promise.all([
+      fetchStations(),
+      fetchBookings(),
+      fetchReviews()
+    ]).then(() => {
+      renderPage(appState.currentPage);
+    });
+  }
+  
+  pulling = false;
+});
+
+
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d52ecf9729bdea1',t:'MTc3MjMxMzIwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
