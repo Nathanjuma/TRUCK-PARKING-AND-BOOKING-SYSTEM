@@ -2303,6 +2303,129 @@ async function fetchReviews() {
   }
 }
 
+// ===== EDIT STATION FUNCTION =====
+async function handleEditStation(e, stationId) {
+  e.preventDefault();
+  
+  console.log('handleEditStation called for ID:', stationId);
+  
+  const btn = document.getElementById('edit-station-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  
+  // Get form values
+  const name = document.getElementById('edit-station-name').value.trim();
+  const location = document.getElementById('edit-station-location').value.trim();
+  const price = parseInt(document.getElementById('edit-station-price').value);
+  const totalSlots = parseInt(document.getElementById('edit-station-total').value);
+  const availableSlots = parseInt(document.getElementById('edit-station-available').value);
+  
+  // Get checkboxes
+  const securityChecked = Array.from(document.querySelectorAll('input[name="edit-security"]:checked')).map(cb => cb.value);
+  const amenitiesChecked = Array.from(document.querySelectorAll('input[name="edit-amenities"]:checked')).map(cb => cb.value);
+  
+  // Prepare data
+  const stationData = {
+    station_name: name,
+    location: location,
+    price_per_night: price,
+    total_slots: totalSlots,
+    available_slots: availableSlots,
+    security_features: securityChecked.join(', '),
+    amenities: amenitiesChecked.join(', ')
+  };
+  
+  console.log('Updating station with data:', stationData);
+  
+  try {
+    // Use the correct URL format - MATCH YOUR PHP API
+    const response = await fetch(`stations.php?action=update&id=${stationId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(stationData)
+    });
+    
+    console.log('Response status:', response.status);
+    
+    const result = await response.json();
+    console.log('Update result:', result);
+    
+    if (result.success) {
+      closeModal();
+      showToast('Station updated successfully!', 'success');
+      
+      // Refresh stations data
+      await fetchStations();
+      
+      // Refresh dashboard
+      navigate('owner-dashboard');
+    } else {
+      showToast(result.message || 'Failed to update station', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+    }
+  } catch (error) {
+    console.error('Update station error:', error);
+    showToast('Failed to update station. Please try again.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+}
+
+// ===== DELETE STATION FUNCTION =====
+async function deleteStation(stationId) {
+  console.log('deleteStation called for ID:', stationId);
+  
+  try {
+    // Use the correct URL format - MATCH YOUR PHP API
+    const response = await fetch(`stations.php?action=delete&id=${stationId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    console.log('Delete response status:', response.status);
+    
+    const result = await response.json();
+    console.log('Delete result:', result);
+    
+    if (result.success) {
+      closeModal();
+      showToast('Station deleted successfully', 'success');
+      
+      // Refresh stations
+      await fetchStations();
+      
+      // Refresh dashboard
+      navigate('owner-dashboard');
+    } else {
+      showToast(result.message || 'Failed to delete station', 'error');
+    }
+  } catch (error) {
+    console.error('Delete station error:', error);
+    showToast('Failed to delete station', 'error');
+  }
+}
+
+// ===== FETCH USERS FUNCTION =====
+async function fetchUsers() {
+  try {
+    const response = await fetch('users.php');
+    const result = await response.json();
+    if (result.success && result.data) {
+      appState.users = result.data;
+      console.log('Users updated:', appState.users.length);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Fetch users error:', error);
+    return false;
+  }
+}
 
 
 // Function to fetch stations from server
@@ -2331,99 +2454,6 @@ async function fetchStations() {
 
 
     
-    async function handleAddStation(e) {
-  e.preventDefault();
-  
-  console.log('handleAddStation called');
-  
-  if (appState.stations.length >= 999) {
-    showToast('Maximum stations reached.', 'error');
-    return;
-  }
-  
-  const btn = document.getElementById('add-station-btn');
-  btn.disabled = true;
-  btn.textContent = 'Adding...';
-  
-  // Get form values
-  const name = document.getElementById('station-name').value.trim();
-  const location = document.getElementById('station-location').value.trim();
-  const price = parseInt(document.getElementById('station-price').value);
-  const slots = parseInt(document.getElementById('station-slots').value);
-  
-  console.log('Form values:', { name, location, price, slots });
-  
-  // Validate
-  if (!name || !location || !price || !slots) {
-    showToast('Please fill all required fields', 'error');
-    btn.disabled = false;
-    btn.textContent = 'Add Station';
-    return;
-  }
-  
-  // Get checkboxes
-  const securityChecked = Array.from(document.querySelectorAll('input[name="security"]:checked')).map(cb => cb.value);
-  const amenitiesChecked = Array.from(document.querySelectorAll('input[name="amenities"]:checked')).map(cb => cb.value);
-  
-  console.log('Security:', securityChecked);
-  console.log('Amenities:', amenitiesChecked);
-  console.log('Current user:', appState.currentUser);
-  
-  // Get user ID - handle both __backendId and id formats
-  const userId = appState.currentUser.__backendId || appState.currentUser.id;
-  console.log('User ID:', userId);
-  
-  // Prepare data
-  const stationData = {
-    owner_id: userId,
-    station_name: name,
-    location: location,
-    price_per_night: price,
-    total_slots: slots,
-    available_slots: slots,
-    security_features: securityChecked.join(', '),
-    amenities: amenitiesChecked.join(', ')
-  };
-  
-  console.log('Sending data:', stationData);
-  
-  try {
-    const response = await fetch('stations.php?action=create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(stationData)
-    });
-    
-    console.log('Response status:', response.status);
-    
-    const result = await response.json();
-    console.log('Add station result:', result);
-    
-    if (result.success) {
-      showToast('Station added successfully!', 'success');
-      closeModal();
-      
-      // IMPORTANT: Wait for stations to refresh
-      console.log('Refreshing stations...');
-      await fetchStations();
-      
-      // Navigate to refresh the dashboard
-      console.log('Navigating to owner dashboard');
-      navigate('owner-dashboard');
-    } else {
-      showToast(result.message || 'Failed to add station', 'error');
-      btn.disabled = false;
-      btn.textContent = 'Add Station';
-    }
-  } catch (error) {
-    console.error('Add station error:', error);
-    showToast('Failed to add station. Please try again.', 'error');
-    btn.disabled = false;
-    btn.textContent = 'Add Station';
-  }
-}
     
     function confirmDeleteStation(stationId) {
       openModal(`
@@ -2698,23 +2728,7 @@ document.addEventListener('touchend', (e) => {
   pulling = false;
 });
 
-   // Toast notification system
-function showToast(message, type = 'success') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.className = `toast ${type} show`;
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-// Modal management
-function openModal(content) {
-  document.getElementById('modal-content').innerHTML = content;
-  document.getElementById('modal-container').classList.remove('hidden');
-}
-
 
   </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d52ecf9729bdea1',t:'MTc3MjMxMzIwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-
 </html>
-
